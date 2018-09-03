@@ -91,8 +91,12 @@ function displayCalendar(events, defaultTicket) {
         var endTime = event.end.dateTime;
 
         var timeElapsed = getTimeElapsed(startTime, endTime);
-        event.timeElapsed = timeElapsed;
-        addRow(event, i, defaultTicket);
+        if (startTime === endTime) { //only include entries that have a duration
+          //do nothing
+        } else {
+          event.timeElapsed = timeElapsed;
+          addRow(event, i, defaultTicket);
+        }
       }
     }
   }
@@ -160,24 +164,21 @@ function addRow(event, counter, defaultTicket) {
     var ticket       = '';
     var ticketMarkUp = '';
 
+    ticket = defaultTicket;
+
     if (event.description) {
-      // check the description and the meeting title for a ticket
+      // check the description for a ticket
       if (event.description.match(/([A-Za-z]+-[0-9]+)/)) {
         var ticketInDescription = event.description.match(/([A-Za-z]+-[0-9]+)/)[0];
         ticket = ticketInDescription;
       }
+    }
+    if (event.summary) {
+      // check the meeting title for a ticket
       if (event.summary.match(/([A-Za-z]+-[0-9]+)/)) {
         var ticketInTitle = event.summary.match(/([A-Za-z]+-[0-9]+)/)[0];
         ticket = ticketInTitle;
       }
-      // if the event had a description but no ticket was found, set the ticket to the default
-      else if (!ticketInDescription && !ticketInTitle) {
-        ticket = defaultTicket;
-      }
-    }
-    // if the event has no description (or no title), set the ticket to the default
-    else {
-      ticket = defaultTicket;
     }
 
     ticketMarkUp = '<input id="ticket[' + counter + ']" class="form-control" type="text" value="'+ ticket +'"">';
@@ -300,13 +301,13 @@ function formatTimeForAPI(time) {
   var endOfTime = time.match(/\d\d[-\+]\d\d:\d\d/);
   endOfTime = endOfTime[0].replace(':', '');
   time = time.replace(/\d\d[-\+]\d\d:\d\d/, endOfTime);
-
   // then add milliseconds
   startOfTime = time.split(/[-\+]\d\d\d\d/)[0];
   endOfTime   = time.split(/T\d\d:\d\d:\d\d/)[1];
   startOfTime = startOfTime + '.000';
 
-  time = startOfTime + endOfTime;
+  // Jira doesn't seem to like including the timezone, so it's commented below
+  time = startOfTime + '+0000'; //+ endOfTime;
   return time;
 }
 
