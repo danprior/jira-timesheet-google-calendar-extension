@@ -91,12 +91,8 @@ function displayCalendar(events, defaultTicket) {
         var endTime = event.end.dateTime;
 
         var timeElapsed = getTimeElapsed(startTime, endTime);
-        if (startTime === endTime) { //only include entries that have a duration
-          //do nothing
-        } else {
-          event.timeElapsed = timeElapsed;
-          addRow(event, i, defaultTicket);
-        }
+        event.timeElapsed = timeElapsed;
+        addRow(event, i, defaultTicket);
       }
     }
   }
@@ -188,6 +184,7 @@ function addRow(event, counter, defaultTicket) {
   // find out if the user attended the meeting and if they did, check the box next to the meeting
   function checkIfAttended(event) {
     var attended = false;
+    var hasDuration = true;
     if (!event.attendees) {
       attended = true;
     }
@@ -202,7 +199,14 @@ function addRow(event, counter, defaultTicket) {
         }
       }
     }
-    if (attended === true) {
+
+    var startTime = event.start.dateTime;
+    var endTime = event.end.dateTime;
+    if (startTime === endTime) { //only include entries that have a duration
+      hasDuration = false;
+    } 
+
+    if (attended === true && hasDuration === true) {
       var checkBoxMarkUp = '<input id="checkbox[' + counter + ']" type="checkbox" checked> <label for="checkbox[' + counter + ']"></label>';
     }
     else {
